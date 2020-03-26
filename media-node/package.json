@@ -1,13 +1,13 @@
 {
-	"name": "multiparty-meeting-server",
+	"name": "multiparty-meeting-media-node",
 	"version": "3.1.0",
 	"private": true,
-	"description": "multiparty meeting server",
+	"description": "multiparty meeting media node",
 	"author": "Håvar Aambø Fosstveit <h@fosstveit.net>",
 	"license": "MIT",
 	"main": "lib/index.js",
 	"scripts": {
-		"start": "DEBUG=${DEBUG:='*mediasoup* *INFO* *WARN* *ERROR*'} INTERACTIVE=${INTERACTIVE:='true'} node server.js",
+		"start": "node server.js",
 		"connect": "node connect.js"
 	},
 	"dependencies": {
