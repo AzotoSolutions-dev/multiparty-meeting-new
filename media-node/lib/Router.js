@@ -86,8 +86,8 @@ class Router extends EventEmitter
 		this._socket.on('routerNotification', (notification) =>
 		{
 			logger.debug(
-				'socket "routerNotification" event [method:%s, data:%o]',
-				notification.method, notification.data);
+				'socket "routerNotification" event [method:"%s"]',
+				notification.method);
 
 			switch (notification.method)
 			{
@@ -138,8 +138,8 @@ class Router extends EventEmitter
 		this._socket.on('transportNotification', (notification) =>
 		{
 			logger.debug(
-				'socket "transportNotification" event [method:%s, data:%o]',
-				notification.method, notification.data);
+				'socket "transportNotification" event [method:"%s"]',
+				notification.method);
 
 			switch (notification.method)
 			{
@@ -184,8 +184,8 @@ class Router extends EventEmitter
 		this._socket.on('producerNotification', (notification) =>
 		{
 			logger.debug(
-				'socket "producerNotification" event [method:%s, data:%o]',
-				notification.method, notification.data);
+				'socket "producerNotification" event [method:"%s"]',
+				notification.method);
 
 			switch (notification.method)
 			{
@@ -230,8 +230,8 @@ class Router extends EventEmitter
 		this._socket.on('consumerNotification', (notification) =>
 		{
 			logger.debug(
-				'socket "consumerNotification" event [method:%s, data:%o]',
-				notification.method, notification.data);
+				'socket "consumerNotification" event [method:"%s"]',
+				notification.method);
 
 			switch (notification.method)
 			{
