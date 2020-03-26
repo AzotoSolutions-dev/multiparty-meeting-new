@@ -95,8 +95,18 @@ async function runWebSocketServer()
 	// Handle connections from clients.
 	io.on('connection', (socket) =>
 	{
-		logger.info(
-			'connection request');
+		logger.info('connection request');
+
+		const { secret } = socket.handshake.query;
+
+		if (!secret || secret !== config.mediaNodeSecret)
+		{
+			logger.warn('no, or wrong secret in request');
+
+			socket.disconnect(true);
+
+			return;
+		}
 
 		socket.on('workerRequest', async (request, cb) =>
 		{

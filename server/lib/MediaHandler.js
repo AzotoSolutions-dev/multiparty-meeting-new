@@ -28,7 +28,7 @@ class MediaHandler extends EventEmitter
 		return new Promise((resolve, reject) =>
 		{
 			const socket = io(
-				`wss://${mediaNode}`, { rejectUnauthorized: false });
+				`wss://${mediaNode}?secret=${config.mediaNodeSecret}`, { rejectUnauthorized: false });
 
 			socket.on('connect', async () =>
 			{

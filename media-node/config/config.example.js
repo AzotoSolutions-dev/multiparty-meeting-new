@@ -8,8 +8,9 @@ module.exports =
 		key  : `${__dirname}/../certs/mediasoup-demo.localhost.key.pem`
 	},
 	// Listening port for https server.
-	listeningPort : 8000,
-	mediasoup     :
+	listeningPort   : 8000,
+	mediaNodeSecret : 'o5xFo8JEU4n7QGnRwEYG86Ti8jZEzz',
+	mediasoup       :
 	{
 		numWorkers : Object.keys(os.cpus()).length,
 		// mediasoup Worker settings.

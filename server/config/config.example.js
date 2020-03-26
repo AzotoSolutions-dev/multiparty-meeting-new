@@ -45,12 +45,13 @@ module.exports =
 			credential : 'example'
 		}
 	],
-	mediaNodes   : [ 'localhost:2443' ],
-	redisOptions : {},
+	mediaNodes      : [ 'localhost:2443' ],
+	mediaNodeSecret : 'o5xFo8JEU4n7QGnRwEYG86Ti8jZEzz',
+	redisOptions    : {},
 	// session cookie secret
-	cookieSecret : 'T0P-S3cR3t_cook!e',
-	cookieName   : 'multiparty-meeting.sid',
-	tls          :
+	cookieSecret    : 'T0P-S3cR3t_cook!e',
+	cookieName      : 'multiparty-meeting.sid',
+	tls             :
 	{
 		cert : `${__dirname}/../certs/mediasoup-demo.localhost.cert.pem`,
 		key  : `${__dirname}/../certs/mediasoup-demo.localhost.key.pem`
