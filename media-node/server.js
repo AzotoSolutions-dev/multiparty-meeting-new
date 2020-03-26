@@ -9,6 +9,7 @@ const express = require('express');
 const mediasoup = require('mediasoup');
 const AwaitQueue = require('awaitqueue');
 const Logger = require('./lib/Logger');
+const MediaNode = require('./lib/MediaNode');
 const Router = require('./lib/Router');
 const helmet = require('helmet');
 const interactiveServer = require('./lib/interactiveServer');
@@ -20,6 +21,8 @@ console.log('- config.mediasoup.logTags:', config.mediasoup.logTags);
 /* eslint-enable no-console */
 
 const logger = new Logger();
+
+const mediaNode = new MediaNode();
 
 const queue = new AwaitQueue();
 

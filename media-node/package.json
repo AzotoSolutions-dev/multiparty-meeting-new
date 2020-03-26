@@ -17,6 +17,7 @@
 		"express": "^4.17.1",
 		"helmet": "^3.21.2",
 		"mediasoup": "^3.5.5",
+		"node-os-utils": "^1.2.2",
 		"pidusage": "^2.0.17",
 		"socket.io": "^2.3.0"
 	},
