@@ -32,8 +32,6 @@ class MediaHandler extends EventEmitter
 
 			socket.on('connect', async () =>
 			{
-				logger.info('createRouter() | connected');
-
 				try
 				{
 					await this._request(socket, 'createRouter', { mediaCodecs });
