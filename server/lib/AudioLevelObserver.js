@@ -18,7 +18,7 @@ class AudioLevelObserver extends EventEmitter
 
 	_handleSocket()
 	{
-		this._socket.on('routerNotification', (notification) =>
+		this._socket.on('audioNotification', (notification) =>
 		{
 			switch (notification.method)
 			{
@@ -86,7 +86,7 @@ class AudioLevelObserver extends EventEmitter
 		return new Promise((resolve, reject) =>
 		{
 			this._socket.emit(
-				'routerRequest',
+				'audioRequest',
 				{ method, data },
 				this._timeoutCallback((err, response) =>
 				{

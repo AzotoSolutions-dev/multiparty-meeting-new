@@ -55,12 +55,12 @@ class Router extends EventEmitter
 		// Set audioLevelObserver events.
 		this._audioLevelObserver.on('volumes', (volumes) =>
 		{
-			this._notification('routerNotification', 'volumes', { volumes });
+			this._notification('audioNotification', 'volumes', { volumes });
 		});
 
 		this._audioLevelObserver.on('silence', () =>
 		{
-			this._notification('routerNotification', 'silence');
+			this._notification('audioNotification', 'silence');
 		});
 	}
 
@@ -103,6 +103,21 @@ class Router extends EventEmitter
 					logger.error('unknown routerNotification.method "%s"', notification.method);
 				}
 			}
+		});
+
+		this._socket.on('audioRequest', (request, cb) =>
+		{
+			logger.debug(
+				'"audioRequest" event [method:"%s"]',
+				request.method);
+
+			this._handleAudioRequest(request, cb)
+				.catch((error) =>
+				{
+					logger.error('"audioRequest" failed [error:"%o"]', error);
+
+					cb(error);
+				});
 		});
 
 		this._socket.on('transportRequest', (request, cb) =>
@@ -323,6 +338,19 @@ class Router extends EventEmitter
 				break;
 			}
 
+			default:
+			{
+				logger.error('unknown request.method "%s"', request.method);
+
+				cb(500, `unknown request.method "${request.method}"`);
+			}
+		}
+	}
+
+	async _handleAudioRequest(request, cb)
+	{
+		switch (request.method)
+		{
 			case 'addProducer':
 			{
 				const { producerId } = request.data;
