@@ -19,5 +19,8 @@
 		"mediasoup": "^3.5.5",
 		"pidusage": "^2.0.17",
 		"socket.io": "^2.3.0"
+	},
+	"devDependencies": {
+		"eslint": "^6.5.1"
 	}
 }
