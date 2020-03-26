@@ -3,9 +3,15 @@ node_modules/
 /app/build/
 /app/public/config/config.js
 /app/public/images/logo.*
+
 /server/config/
 !/server/config/config.example.js
 /server/public/
 /server/certs/
 !/server/certs/mediasoup-demo.localhost.*
+
+/media-node/config/config.js
+/media-node/certs/
+!/media-node/certs/mediasoup-demo.localhost.*
+
 .vscode

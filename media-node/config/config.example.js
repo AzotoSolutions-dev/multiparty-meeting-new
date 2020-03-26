@@ -2,80 +2,14 @@ const os = require('os');
 
 module.exports =
 {
-
-	// Auth conf
-	/*
-	auth :
-	{
-		lti :
-		{
-			consumerKey    : 'key',
-			consumerSecret : 'secret'
-		},
-		oidc:
-		{
-			// The issuer URL for OpenID Connect discovery
-			// The OpenID Provider Configuration Document
-			// could be discovered on:
-			// issuerURL + '/.well-known/openid-configuration'
-
-			issuerURL     : 'https://example.com',
-			clientOptions :
-			{
-				client_id     : '',
-				client_secret : '',
-				scope       		: 'openid email profile',
-				// where client.example.com is your multiparty meeting server
-				redirect_uri  : 'https://client.example.com/auth/callback'
-			}
-
-		}
-	},
-	*/
-	// URI and key for requesting geoip-based TURN server closest to the client
-	turnAPIKey        : 'examplekey',
-	turnAPIURI        : 'https://example.com/api/turn',
-	// Backup turnservers if REST fails or is not configured
-	backupTurnServers : [
-		{
-			urls : [
-				'turn:turn.example.com:443?transport=tcp'
-			],
-			username   : 'example',
-			credential : 'example'
-		}
-	],
-	mediaNodes   : [ 'localhost:2443' ],
-	redisOptions : {},
-	// session cookie secret
-	cookieSecret : 'T0P-S3cR3t_cook!e',
-	cookieName   : 'multiparty-meeting.sid',
-	tls          :
+	tls :
 	{
 		cert : `${__dirname}/../certs/mediasoup-demo.localhost.cert.pem`,
 		key  : `${__dirname}/../certs/mediasoup-demo.localhost.key.pem`
 	},
 	// Listening port for https server.
-	listeningPort         : 443,
-	// Any http request is redirected to https.
-	// Listening port for http server. 
-	listeningRedirectPort : 80,
-	// Listens only on http, only on listeningPort
-	// listeningRedirectPort disabled
-	// use case: loadbalancer backend
-	httpOnly              : false,
-	// If this is set to true, only signed-in users will be able
-	// to join a room directly. Non-signed-in users (guests) will
-	// always be put in the lobby regardless of room lock status.
-	// If false, there is no difference between guests and signed-in
-	// users when joining.
-	requireSignInToAccess : true,
-	// This flag has no effect when requireSignInToAccess is false
-	// When truthy, the room will be open to all users when the first
-	// authenticated user has already joined the room.
-	activateOnHostJoin    : true,
-	// Mediasoup settings
-	mediasoup             :
+	listeningPort : 8000,
+	mediasoup     :
 	{
 		numWorkers : Object.keys(os.cpus()).length,
 		// mediasoup Worker settings.

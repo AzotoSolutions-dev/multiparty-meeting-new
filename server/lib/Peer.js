@@ -275,7 +275,7 @@ class Peer extends EventEmitter
 	getConsumerTransport()
 	{
 		return Array.from(this.transports.values())
-			.find((t) => t.appData.consuming);
+			.find((t) => t._appData.consuming);
 	}
 
 	removeTransport(id)

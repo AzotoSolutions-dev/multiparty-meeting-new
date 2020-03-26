@@ -13,11 +13,10 @@ class Room extends EventEmitter
 	 *
 	 * @async
 	 *
-	 * @param {mediasoup.Worker} mediasoupWorker - The mediasoup Worker in which a new
-	 *   mediasoup Router must be created.
+	 * @param {MediaHandler} mediaHandler - MediaHandler instance.
 	 * @param {String} roomId - Id of the Room instance.
 	 */
-	static async create({ mediasoupWorker, roomId })
+	static async create({ mediaHandler, roomId })
 	{
 		logger.info('create() [roomId:"%s"]', roomId);
 
@@ -25,7 +24,7 @@ class Room extends EventEmitter
 		const mediaCodecs = config.mediasoup.router.mediaCodecs;
 
 		// Create a mediasoup Router.
-		const mediasoupRouter = await mediasoupWorker.createRouter({ mediaCodecs });
+		const mediasoupRouter = await mediaHandler.createRouter({ mediaCodecs });
 
 		// Create a mediasoup AudioLevelObserver.
 		const audioLevelObserver = await mediasoupRouter.createAudioLevelObserver(
@@ -241,7 +240,7 @@ class Room extends EventEmitter
 					peer.socket,
 					'activeSpeaker',
 					{
-						peerId : producer.appData.peerId,
+						peerId : producer._appData.peerId,
 						volume : volume
 					});
 			}
@@ -457,7 +456,9 @@ class Room extends EventEmitter
 		{
 			case 'getRouterRtpCapabilities':
 			{
-				cb(null, this._mediasoupRouter.rtpCapabilities);
+				const rtpCapabilities = await this._mediasoupRouter.getRtpCapabilities();
+
+				cb(null, rtpCapabilities);
 
 				break;
 			}
@@ -1137,13 +1138,14 @@ class Room extends EventEmitter
 		//   server-side Consumer (when resuming it).
 
 		// NOTE: Don't create the Consumer if the remote Peer cannot consume it.
+		const canConsume = await this._mediasoupRouter.canConsume({
+			producerId      : producer.id,
+			rtpCapabilities : consumerPeer.rtpCapabilities
+		});
+
 		if (
 			!consumerPeer.rtpCapabilities ||
-			!this._mediasoupRouter.canConsume(
-				{
-					producerId      : producer.id,
-					rtpCapabilities : consumerPeer.rtpCapabilities
-				})
+			!canConsume
 		)
 		{
 			return;
@@ -1238,7 +1240,7 @@ class Room extends EventEmitter
 					id             : consumer.id,
 					rtpParameters  : consumer.rtpParameters,
 					type           : consumer.type,
-					appData        : producer.appData,
+					appData        : producer._appData,
 					producerPaused : consumer.producerPaused
 				}
 			);

@@ -10,11 +10,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
-const mediasoup = require('mediasoup');
 const AwaitQueue = require('awaitqueue');
 const Logger = require('./lib/Logger');
 const Room = require('./lib/Room');
 const Peer = require('./lib/Peer');
+const MediaHandler = require('./lib/MediaHandler');
 const base64 = require('base-64');
 const helmet = require('helmet');
 
@@ -34,23 +34,12 @@ const RedisStore = require('connect-redis')(expressSession);
 const sharedSession = require('express-socket.io-session');
 const interactiveServer = require('./lib/interactiveServer');
 
-/* eslint-disable no-console */
-console.log('- process.env.DEBUG:', process.env.DEBUG);
-console.log('- config.mediasoup.logLevel:', config.mediasoup.logLevel);
-console.log('- config.mediasoup.logTags:', config.mediasoup.logTags);
-/* eslint-enable no-console */
-
 const logger = new Logger();
 
 const queue = new AwaitQueue();
 
-// mediasoup Workers.
-// @type {Array<mediasoup.Worker>}
-const mediasoupWorkers = [];
-
-// Index of next mediasoup Worker to use.
-// @type {Number}
-let nextMediasoupWorkerIdx = 0;
+// Media handler
+const mediaHandler = new MediaHandler();
 
 // Map of Room instances indexed by roomId.
 const rooms = new Map();
@@ -129,9 +118,6 @@ async function run()
 	{
 		await setupAuth();
 	}
-
-	// Run a mediasoup Worker.
-	await runMediasoupWorkers();
 
 	// Run HTTPS server.
 	await runHttpsServer();
@@ -515,50 +501,6 @@ async function runWebSocketServer()
 }
 
 /**
- * Launch as many mediasoup Workers as given in the configuration file.
- */
-async function runMediasoupWorkers()
-{
-	const { numWorkers } = config.mediasoup;
-
-	logger.info('running %d mediasoup Workers...', numWorkers);
-
-	for (let i = 0; i < numWorkers; ++i)
-	{
-		const worker = await mediasoup.createWorker(
-			{
-				logLevel   : config.mediasoup.worker.logLevel,
-				logTags    : config.mediasoup.worker.logTags,
-				rtcMinPort : config.mediasoup.worker.rtcMinPort,
-				rtcMaxPort : config.mediasoup.worker.rtcMaxPort
-			});
-
-		worker.on('died', () =>
-		{
-			logger.error(
-				'mediasoup Worker died, exiting  in 2 seconds... [pid:%d]', worker.pid);
-
-			setTimeout(() => process.exit(1), 2000);
-		});
-
-		mediasoupWorkers.push(worker);
-	}
-}
-
-/**
- * Get next mediasoup Worker.
- */
-function getMediasoupWorker()
-{
-	const worker = mediasoupWorkers[nextMediasoupWorkerIdx];
-
-	if (++nextMediasoupWorkerIdx === mediasoupWorkers.length)
-		nextMediasoupWorkerIdx = 0;
-
-	return worker;
-}
-
-/**
  * Get a Room instance (or create one if it does not exist).
  */
 async function getOrCreateRoom({ roomId })
@@ -570,9 +512,7 @@ async function getOrCreateRoom({ roomId })
 	{
 		logger.info('creating a new Room [roomId:"%s"]', roomId);
 
-		const mediasoupWorker = getMediasoupWorker();
-
-		room = await Room.create({ mediasoupWorker, roomId });
+		room = await Room.create({ mediaHandler, roomId });
 
 		rooms.set(roomId, room);
 
