@@ -14,15 +14,19 @@ class MediaHandler extends EventEmitter
 
 		super();
 
-		this._mediaNodes = config.mediaNodes;
+		this._mediaNodesAddresses = config.mediaNodes;
+
+		this._mediaNodes = {};
+
+		this._routers = {};
 	}
 
 	async createRouter({ mediaCodecs })
 	{
 		logger.info('createRouter()');
 
-		const mediaNode = this._mediaNodes[
-			Math.floor(Math.random() * this._mediaNodes.length)
+		const mediaNode = this._mediaNodesAddresses[
+			Math.floor(Math.random() * this._mediaNodesAddresses.length)
 		];
 
 		return new Promise((resolve, reject) =>
