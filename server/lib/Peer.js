@@ -37,13 +37,19 @@ class Peer extends EventEmitter
 
 		this._rtpCapabilities = null;
 
+		this._sctpCapabilities = null;
+
 		this._raisedHand = false;
 
 		this._transports = new Map();
 
 		this._producers = new Map();
 
+		this._dataProducers = new Map();
+
 		this._consumers = new Map();
+
+		this._dataConsumers = new Map();
 
 		this._handlePeer();
 	}
@@ -224,6 +230,16 @@ class Peer extends EventEmitter
 		this._rtpCapabilities = rtpCapabilities;
 	}
 
+	get sctpCapabilities()
+	{
+		return this._sctpCapabilities;
+	}
+
+	set sctpCapabilities(sctpCapabilities)
+	{
+		this._sctpCapabilities = sctpCapabilities;
+	}
+
 	get raisedHand()
 	{
 		return this._raisedHand;
@@ -244,9 +260,19 @@ class Peer extends EventEmitter
 		return this._producers;
 	}
 
+	get dataProducers()
+	{
+		return this._dataProducers;
+	}
+
 	get consumers()
 	{
 		return this._consumers;
+	}
+
+	get dataConsumers()
+	{
+		return this._dataConsumers;
 	}
 
 	addRole(newRole)
@@ -314,6 +340,21 @@ class Peer extends EventEmitter
 		this.producers.delete(id);
 	}
 
+	addDataProducer(id, dataProducer)
+	{
+		this.dataProducers.set(id, dataProducer);
+	}
+
+	getDataProducer(id)
+	{
+		return this.dataProducers.get(id);
+	}
+
+	removeDataProducer(id)
+	{
+		this.dataProducers.delete(id);
+	}
+
 	addConsumer(id, consumer)
 	{
 		this.consumers.set(id, consumer);
@@ -327,6 +368,21 @@ class Peer extends EventEmitter
 	removeConsumer(id)
 	{
 		this.consumers.delete(id);
+	}
+
+	addDataConsumer(id, dataConsumer)
+	{
+		this.dataConsumers.set(id, dataConsumer);
+	}
+
+	getDataConsumer(id)
+	{
+		return this.dataConsumers.get(id);
+	}
+
+	removeDataConsumer(id)
+	{
+		this.dataConsumers.delete(id);
 	}
 
 	get peerInfo()
