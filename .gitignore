@@ -9,3 +9,5 @@ node_modules/
 /server/certs/
 !/server/certs/mediasoup-demo.localhost.*
 .vscode
+/management-api/config/production.json
+/management-api/lib/
