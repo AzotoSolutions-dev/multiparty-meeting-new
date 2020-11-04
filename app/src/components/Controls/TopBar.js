@@ -22,6 +22,7 @@ import Menu from '@material-ui/core/Menu';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import RecordVoiceOverIcon from '@material-ui/icons/RecordVoiceOver';
 import MenuIcon from '@material-ui/icons/Menu';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
@@ -252,6 +253,17 @@ const TopBar = (props) =>
 		intl.formatMessage({
 			id             : 'tooltip.lockRoom',
 			defaultMessage : 'Lock room'
+		});
+
+	const recordTooltip = room.record ?
+		intl.formatMessage({
+			id             : 'tooltip.startRecording',
+			defaultMessage : 'Start recording.'
+		})
+		:
+		intl.formatMessage({
+			id             : 'tooltip.stopRecording',
+			defaultMessage : 'Stop recording'
 		});
 
 	const fullscreenTooltip = fullscreen ?
@@ -555,6 +567,22 @@ const TopBar = (props) =>
 				{ currentMenu === 'moreActions' &&
 					<Paper>
 						<MenuItem
+							aria-label={recordTooltip}
+						>
+							<Badge
+								color='primary'
+							>
+								<RecordVoiceOverIcon />
+							</Badge>
+							<p className={classes.moreAction}>
+								<FormattedMessage
+									id='tooltip.recordTooltip'
+									defaultMessage='Record room'
+								/>
+							</p>
+						</MenuItem>
+
+						<MenuItem
 							disabled={!canProduceExtraVideo}
 							onClick={() =>
 							{
@@ -714,6 +742,34 @@ const TopBar = (props) =>
 						}
 					</MenuItem>
 				}
+				<MenuItem
+					aria-label={recordTooltip}
+					onClick={() =>
+					{
+						handleMenuClose();
+						if (!room.locked)
+						{
+							roomClient.startRoomRecord();
+						}
+						else
+						{
+							roomClient.stopRoomRecord();
+						}
+					}
+					}
+				>
+					<Badge
+						color='primary'
+					>
+						<RecordVoiceOverIcon />
+					</Badge>
+					<p className={classes.moreAction}>
+						<FormattedMessage
+							id='tooltip.recordTooltip'
+							defaultMessage='Record room'
+						/>
+					</p>
+				</MenuItem>
 				<MenuItem
 					aria-label={lockTooltip}
 					disabled={!canLock}
