@@ -2444,6 +2444,38 @@ export default class RoomClient
 						break;
 					}
 
+					case 'startRoomRecord':
+					{
+						store.dispatch(
+							roomActions.setRecordStarted());
+
+						store.dispatch(requestActions.notify(
+							{
+								text : intl.formatMessage({
+									id             : 'room.startRecording',
+									defaultMessage : ''
+								})
+							}));
+
+						break;
+					}
+
+					case 'stopRoomRecord':
+					{
+						store.dispatch(
+							roomActions.setRecordStoped());
+
+						store.dispatch(requestActions.notify(
+							{
+								text : intl.formatMessage({
+									id             : 'room.stopRecording',
+									defaultMessage : ''
+								})
+							}));
+
+						break;
+					}
+
 					case 'lockRoom':
 					{
 						store.dispatch(
@@ -3431,15 +3463,15 @@ export default class RoomClient
 
 		try
 		{
-			/* await this.sendRequest('startRoomRecord'); */
+			await this.sendRequest('startRoomRecord');
 
-			/* store.dispatch(roomActions.setRoomRecord()); */
+			store.dispatch(roomActions.setRecordStarted());
 
 			store.dispatch(requestActions.notify(
 				{
 					text : intl.formatMessage({
 						id             : 'room.youstartedrecording',
-						defaultMessage : 'You started recording the room'
+						defaultMessage : 'You started recording the room2'
 					})
 				}));
 		}
@@ -3464,7 +3496,7 @@ export default class RoomClient
 		{
 			await this.sendRequest('stopRoomRecord');
 
-			/* store.dispatch(roomActions.setRoomLocked()); */
+			store.dispatch(roomActions.setRecordStoped());
 			store.dispatch(requestActions.notify(
 				{
 					text : intl.formatMessage({
