@@ -3474,16 +3474,19 @@ export default class RoomClient
 		{
 			const ctx = new AudioContext();
 			const dest = ctx.createMediaStreamDestination();
+			const micms = new MediaStream();
 
-			if (stream1.getAudioTracks().length > 0)
-				ctx.createMediaStreamSource(stream1).connect(dest);
+			micms.addTrack(stream1);
+
+			if (micms.getAudioTracks().length > 0)
+				ctx.createMediaStreamSource(micms).connect(dest);
 
 			if (stream2.getAudioTracks().length > 0)
 				ctx.createMediaStreamSource(stream2).connect(dest);
 
 			let tracks = dest.stream.getTracks();
 
-			tracks = tracks.concat(stream1.getVideoTracks()).concat(stream2.getVideoTracks());
+			tracks = tracks.concat(stream2.getVideoTracks());
 
 			return new MediaStream(tracks);
 
@@ -3491,15 +3494,21 @@ export default class RoomClient
 
 		try
 		{
-			gumStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			gumStream = this._micProducer.track;
 			gdmStream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'browser' }, audio: true });
 
 		}
-		catch (e)
+		catch (error)
 		{
-			console.error('capture failure', e);
-
-			return;
+			store.dispatch(requestActions.notify(
+				{
+					type : 'error',
+					text : intl.formatMessage({
+						id             : 'room.cantRecord',
+						defaultMessage : 'Unable to record the room'
+					})
+				}));
+			logger.error('startRoomRecord() [error:"%o"]', error);
 		}
 
 		recorderStream = gumStream ? mixer(gumStream, gdmStream): gdmStream;
@@ -3556,17 +3565,24 @@ export default class RoomClient
 
 				/* Stop all used video/audio tracks */
 				recorderStream.getTracks().forEach((track) => track.stop());
-				gumStream.getTracks().forEach((track) => track.stop());
+
 				gdmStream.getTracks().forEach((track) => track.stop());
 
 				RecordRTC.invokeSaveAsDialog(blob, 'save.mp4');
 			});
 		}
-		catch (e)
+		catch (error)
 		{
-			console.error('capture failure', e);
+			store.dispatch(requestActions.notify(
+				{
+					type : 'error',
+					text : intl.formatMessage({
+						id             : 'room.cantRecord',
+						defaultMessage : 'Unable to record the room'
+					})
+				}));
 
-			return;
+			logger.error('stopRoomRecord() [error:"%o"]', error);
 		}
 
 		try
