@@ -68,6 +68,15 @@
 	"room.stopAllScreenSharing": null,
 	"room.hideSelfView": null,
 	"room.showSelfView": null,
+	"room.startRecording": null,
+	"room.stopRecording": null,
+	"room.roomRecordCodecs": null,
+	"room.cantRoomRecordCodecs": null,
+	"room.roomRecord": null,
+	"room.youStartedRoomRecording": null,
+	"room.unableToRoomRecord": null,
+	"room.cantStartRoomRecord": null,
+	"room.youStoppedRoomRecording": null,
 
 	"me.mutedPTT": null,
 
@@ -173,6 +182,7 @@
 	"settings.noiseThreshold": null,
 	"settings.mirrorOwnVideo": null,
 	"settings.language": null,
+	"settings.codecs": null,
 
 	"filesharing.saveFileError": "Kan ikke gemme fil",
 	"filesharing.startingFileShare": "Forsøger at dele filen",
