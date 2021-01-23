@@ -1,31 +1,33 @@
 const initialState =
 {
-	displayName             : `Guest ${Math.floor(Math.random() * (100000 - 10000)) + 10000}`,
-	selectedWebcam          : null,
-	selectedAudioDevice     : null,
-	advancedMode            : false,
-	autoGainControl         : false,
-	echoCancellation        : true,
-	noiseSuppression        : true,
-	voiceActivatedUnmute    : false,
-	noiseThreshold          : -50,
-	audioMuted              : false,
-	videoMuted              : false,
+	displayName                : `Guest ${Math.floor(Math.random() * (100000 - 10000)) + 10000}`,
+	selectedWebcam             : null,
+	selectedAudioDevice        : null,
+	advancedMode               : false,
+	autoGainControl            : false,
+	echoCancellation           : true,
+	noiseSuppression           : true,
+	voiceActivatedUnmute       : false,
+	noiseThreshold             : -50,
+	audioMuted                 : false,
+	videoMuted                 : false,
 	// low, medium, high, veryhigh, ultra
-	resolution              : window.config.defaultResolution || 'medium',
-	frameRate               : window.config.defaultFrameRate || 15,
-	screenSharingResolution : window.config.defaultScreenResolution || 'veryhigh',
-	screenSharingFrameRate  : window.config.defaultScreenSharingFrameRate || 5,
-	lastN                   : 4,
-	permanentTopBar         : true,
-	hiddenControls          : false,
-	showNotifications       : true,
-	notificationSounds      : true,
-	mirrorOwnVideo          : true,
-	buttonControlBar        : window.config.buttonControlBar || false,
-	drawerOverlayed         : window.config.drawerOverlayed || true,
-	aspectRatio             : window.config.viewAspectRatio || 1.777, // 16 : 9
-	mediaPerms              : { audio: true, video: true },
+	resolution                 : window.config.defaultResolution || 'medium',
+	frameRate                  : window.config.defaultFrameRate || 15,
+	screenSharingResolution    : window.config.defaultScreenResolution || 'veryhigh',
+	screenSharingFrameRate     : window.config.defaultScreenSharingFrameRate || 5,
+	recorderPreferredMimeType  : window.config.defaultRecorderMimeType || 'video/webm',
+	recorderSupportedMimeTypes : [],
+	lastN                      : 4,
+	permanentTopBar            : true,
+	hiddenControls             : false,
+	showNotifications          : true,
+	notificationSounds         : true,
+	mirrorOwnVideo             : true,
+	buttonControlBar           : window.config.buttonControlBar || false,
+	drawerOverlayed            : window.config.drawerOverlayed || true,
+	aspectRatio                : window.config.viewAspectRatio || 1.777, // 16 : 9
+	mediaPerms                 : { audio: true, video: true },
 	...window.config.defaultAudio
 };
 
@@ -242,6 +244,20 @@ const settings = (state = initialState, action) =>
 			const { videoMuted } = action.payload;
 
 			return { ...state, videoMuted };
+		}
+
+		case 'SET_RECORDER_SUPPORTED_MIME_TYPES':
+		{
+			const { recorderSupportedMimeTypes } = action.payload;
+
+			return { ...state, recorderSupportedMimeTypes };
+		}
+
+		case 'SET_RECORDER_PREFERRED_MIME_TYPE':
+		{
+			const { recorderPreferredMimeType } = action.payload;
+
+			return { ...state, recorderPreferredMimeType };
 		}
 
 		default:

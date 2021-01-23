@@ -43,6 +43,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = (theme) =>
 	({
@@ -225,7 +226,6 @@ const TopBar = (props) =>
 		fullscreen,
 		onFullscreen,
 		setSettingsOpen,
-		setRoomRecordOpen,
 		setExtraVideoOpen,
 		setHelpOpen,
 		setAboutOpen,
@@ -256,15 +256,15 @@ const TopBar = (props) =>
 			defaultMessage : 'Lock room'
 		});
 
-	const recordTooltip = room.recording ?
-		intl.formatMessage({
-			id             : 'tooltip.startRecording',
-			defaultMessage : 'Start recording.'
-		})
-		:
+	const recordTooltip = room.recordedLocally ?
 		intl.formatMessage({
 			id             : 'tooltip.stopRecording',
 			defaultMessage : 'Stop recording'
+		})
+		:
+		intl.formatMessage({
+			id             : 'tooltip.startRecording',
+			defaultMessage : 'Start recording.'
 		});
 
 	const fullscreenTooltip = fullscreen ?
@@ -331,6 +331,7 @@ const TopBar = (props) =>
 					}
 					<div className={classes.grow} />
 					<div className={classes.sectionDesktop}>
+						{room.recordedLocally && <CircularProgress color='secondary' />}
 						<Tooltip
 							title={intl.formatMessage({
 								id             : 'label.moreActions',
@@ -572,13 +573,13 @@ const TopBar = (props) =>
 							onClick={() =>
 							{
 								handleMenuClose();
-								if (!room.recording)
+								if (room.recordedLocally)
 								{
-									setRoomRecordOpen(!room.roomRecordOpen);
+									roomClient.stopRoomRecord();
 								}
 								else
 								{
-									roomClient.stopRoomRecord();
+									roomClient.startRoomRecord();
 								}
 							}
 							}
@@ -589,7 +590,7 @@ const TopBar = (props) =>
 								<RecordVoiceOverIcon />
 							</Badge>
 
-							{ room.recording ?
+							{ room.recordedLocally ?
 								<p className={classes.moreAction}>
 									<FormattedMessage
 										id='tooltip.stopRecording'
@@ -772,13 +773,13 @@ const TopBar = (props) =>
 					onClick={() =>
 					{
 						handleMenuClose();
-						if (!room.recording)
+						if (room.recordedLocally)
 						{
-							setRoomRecordOpen(!room.roomRecordOpen);
+							roomClient.stopRoomRecord();
 						}
 						else
 						{
-							roomClient.stopRoomRecord();
+							roomClient.startRoomRecord();
 						}
 					}
 					}
@@ -788,7 +789,7 @@ const TopBar = (props) =>
 					>
 						<RecordVoiceOverIcon />
 					</Badge>
-					{ room.recording ?
+					{ room.recordedLocally ?
 						<p className={classes.moreAction}>
 							<FormattedMessage
 								id='tooltip.stopRecording'
@@ -798,7 +799,6 @@ const TopBar = (props) =>
 						:
 						<p className={classes.moreAction}>
 							<FormattedMessage
-
 								id='tooltip.startRecording'
 								defaultMessage='Room record started'
 							/>
@@ -1033,7 +1033,6 @@ TopBar.propTypes =
 	onFullscreen         : PropTypes.func.isRequired,
 	setToolbarsVisible   : PropTypes.func.isRequired,
 	setSettingsOpen      : PropTypes.func.isRequired,
-	setRoomRecordOpen    : PropTypes.func.isRequired,
 	setExtraVideoOpen    : PropTypes.func.isRequired,
 	setHelpOpen          : PropTypes.func.isRequired,
 	setAboutOpen         : PropTypes.func.isRequired,
@@ -1096,10 +1095,6 @@ const mapDispatchToProps = (dispatch) =>
 		setSettingsOpen : (settingsOpen) =>
 		{
 			dispatch(roomActions.setSettingsOpen(settingsOpen));
-		},
-		setRoomRecordOpen : (roomRecordOpen) =>
-		{
-			dispatch(roomActions.setRoomRecordOpen(roomRecordOpen));
 		},
 		setExtraVideoOpen : (extraVideoOpen) =>
 		{

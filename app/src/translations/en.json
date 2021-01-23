@@ -146,8 +146,7 @@
 	"label.login": "Login",
 	"label.logout": "Logout",
 	"label.join": "Join",
-	"label.startRoomRecord": "Room recording",
-
+	
 	"settings.settings": "Settings",
 	"settings.camera": "Camera",
 	"settings.selectCamera": "Select video device",
@@ -183,7 +182,7 @@
 	"settings.noiseThreshold": "Noise threshold",
 	"settings.mirrorOwnVideo": "Mirror view of own video",
 	"settings.language": "Select language",
-	"settings.codecs": "Codecs",
+	"settings.recordingsPreferredMimeType": "Select your preferred video mime type",
 
 	"filesharing.saveFileError": "Unable to save file",
 	"filesharing.startingFileShare": "Attempting to share file",
