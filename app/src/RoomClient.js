@@ -21,6 +21,7 @@ import { permissions } from './permissions';
 import * as locales from './translations/locales';
 import { createIntl } from 'react-intl';
 import { openDB, deleteDB } from 'idb';
+import streamSaver from 'streamsaver';
 
 let createTorrent;
 
@@ -3621,6 +3622,62 @@ export default class RoomClient
 				}
 			}
 		};
+		function saveRecordingCleanup(writer, db, dbName)
+		{
+			writer.close();
+			// destroy
+			db.close();
+			deleteDB(dbName);
+			recordingMimeType=null;
+			recordingData=[];
+			recorder = null;
+
+		}
+		function saveBlobDEV(keys, writer, stop = false, db, dbName)
+		{
+
+			let readableStream = null;
+
+			let reader = null;
+
+			let pump = null;
+
+			const key = keys[0];
+
+			if (stop)
+			{
+				// Stop all used video/audio tracks
+				if (recorderStream && recorderStream.getTracks().length > 0)
+					recorderStream.getTracks().forEach((track) => track.stop());
+
+				if (gdmStream && gdmStream.getTracks().length > 0)
+					gdmStream.getTracks().forEach((track) => track.stop());
+			}
+			keys.shift();
+			idbDB.get(idbStoreName, key).then((blob) =>
+			{
+				if (keys.length===0)
+				{
+					readableStream = blob.stream();
+					reader = readableStream.getReader();
+					pump = () => reader.read()
+						.then((res) => (res.done
+							? saveRecordingCleanup(writer, db, dbName)
+							: writer.write(res.value).then(pump)));
+					pump();
+				}
+				else
+				{
+					readableStream = blob.stream();
+					reader = readableStream.getReader();
+					pump = () => reader.read()
+						.then((res) => (res.done
+							? saveBlobDEV(keys, writer, false, db, dbName)
+							: writer.write(res.value).then(pump)));
+					pump();
+				}
+			});
+		}
 
 		recorder.onstop = (e) =>
 		{
@@ -3630,13 +3687,24 @@ export default class RoomClient
 			{
 				try
 				{
-					idbDB.getAll(idbStoreName).then((blobs) =>
+					const fileStream = streamSaver.createWriteStream('sample.mp4', {
+						// size : blob.size // Makes the procentage visiable in the download
+					});
+
+					const writer = fileStream.getWriter();
+
+					idbDB.getAllKeys(idbStoreName).then((keys) =>
+					{
+						saveBlobDEV(keys, writer, true, idbDB, idbName);
+
+					});
+
+					/* idbDB.getAll(idbStoreName).then((blobs) =>
 					{
 
 						this.saveRecordingAndCleanup(blobs, idbDB, idbName);
 
-					});
-
+					}); */
 				}
 				catch (error)
 				{
