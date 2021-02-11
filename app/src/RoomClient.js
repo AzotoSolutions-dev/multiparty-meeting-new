@@ -22,6 +22,7 @@ import * as locales from './translations/locales';
 import { createIntl } from 'react-intl';
 import { openDB, deleteDB } from 'idb';
 import streamSaver from 'streamsaver';
+import { WritableStream } from 'web-streams-polyfill/ponyfill';
 
 let createTorrent;
 
@@ -3687,6 +3688,11 @@ export default class RoomClient
 			{
 				try
 				{
+					// On firefox WritableStream isn't implemented yet polyfill will fix it
+					if (!window.WritableStream)
+					{
+						streamSaver.WritableStream = WritableStream;
+					}
 					const fileStream = streamSaver.createWriteStream('sample.mp4', {
 						// size : blob.size // Makes the procentage visiable in the download
 					});
