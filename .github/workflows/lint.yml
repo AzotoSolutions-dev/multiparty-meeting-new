@@ -12,7 +12,7 @@ jobs:
       run: npm run lint
       working-directory: app
     - name: Install Server modules
-      run: npm install eslint
+      run: npm install eslint eslint-plugin-react
       working-directory: server
     - name: Run Server ESLint
       run: npm run lint
