@@ -5,16 +5,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install Server modules
-      run: npm install
-      working-directory: server
-    - name: Run ESLint
-      run: npm run lint
-      working-directory: server
     - name: Install App modules
       run: npm install
       working-directory: app
     - name: Run App ESLint
       run: npm run lint
       working-directory: app
+    - name: Install Server modules
+      run: npm install
+      working-directory: server
+    - name: Run Server ESLint
+      run: npm run lint
+      working-directory: server
 
