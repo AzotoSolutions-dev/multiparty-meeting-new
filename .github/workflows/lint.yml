@@ -6,13 +6,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Server modules
-      run: npm ci
+      run: npm install
       working-directory: server
     - name: Run ESLint
       run: npm run lint
       working-directory: server
     - name: Install App modules
-      run: npm ci
+      run: npm install
       working-directory: app
     - name: Run App ESLint
       run: npm run lint
