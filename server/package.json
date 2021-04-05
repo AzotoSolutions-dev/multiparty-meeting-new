@@ -16,7 +16,7 @@
 	"scripts": {
 		"start": "node server.js",
 		"connect": "node connect.js",
-		"lint": "eslint -c .eslintrc.json --ext .js *.js lib/"
+		"lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .js *.js lib/"
 	},
 	"dependencies": {
 		"awaitqueue": "^1.0.0",

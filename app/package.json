@@ -65,7 +65,7 @@
 		"eject": "react-scripts eject",
 		"electron": "electron --no-sandbox .",
 		"dev": "nf start -p 3000",
-		"lint": "eslint -c .eslintrc.json --ext .js src"
+		"lint": "eslint -c .eslintrc.json --max-warnings 0 --ext .js src"
 	},
 	"browserslist": [
 		">0.2%",
