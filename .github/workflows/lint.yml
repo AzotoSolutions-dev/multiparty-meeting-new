@@ -1,0 +1,20 @@
+name: lint
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Server modules
+      run: npm ci
+      working-directory: server
+    - name: Run ESLint
+      run: npm run lint
+      working-directory: server
+    - name: Install App modules
+      run: npm ci
+      working-directory: app
+    - name: Run App ESLint
+      run: npm run lint
+      working-directory: app
+
