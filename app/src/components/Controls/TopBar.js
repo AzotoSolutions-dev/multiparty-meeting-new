@@ -745,12 +745,14 @@ const TopBar = (props) =>
 										store.getState().settings.recorderPreferredMimeType;
 										const additionalAudioTracks = [];
 										const micProducer = Object.values(producers).find((p) => p.source === 'mic');
+										const roomname = room.name;
 
 										if (micProducer) additionalAudioTracks.push(micProducer.track);
 										await recorder.startLocalRecording({
 											roomClient,
 											additionalAudioTracks,
-											recordingMimeType
+											recordingMimeType,
+											roomname
 										});
 
 										recorder.checkAudioConsumer(consumers);

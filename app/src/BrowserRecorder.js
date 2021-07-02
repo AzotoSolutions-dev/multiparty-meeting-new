@@ -81,11 +81,15 @@ export default class BrowserRecorder
 
 	async startLocalRecording(
 		{
-			roomClient, additionalAudioTracks, recordingMimeType
+			roomClient, additionalAudioTracks, recordingMimeType, roomname
 		})
 	{
 		this.roomClient = roomClient;
 		this.recordingMimeType = recordingMimeType;
+		const dt = new Date();
+		const rdt = `${dt.getFullYear() }-${ (`0${ dt.getMonth()+1}`).slice(-2) }-${ (`0${ dt.getDate()}`).slice(-2) }_${dt.getHours() }:${(`0${ dt.getMinutes()}`).slice(-2) }:${dt.getSeconds()}`;
+
+		this.fileName = `${roomname}-recording-${rdt}.webm`;
 		this.logger.debug('startLocalRecording()');
 
 		this.ctx = new AudioContext();
@@ -162,7 +166,7 @@ export default class BrowserRecorder
 			let chunkCounter = 0;
 
 			// Save a recorded chunk (blob) to indexedDB
-			const saveToDB = async function(data)
+			const saveToDB = async (data) =>
 			{
 				return await this.idbDB.put(this.idbStoreName, data, Date.now());
 			};
@@ -523,7 +527,7 @@ export default class BrowserRecorder
 
 			const micProducer = Object.values(producers).find((p) => p.source === 'mic');
 
-			if (micProducer && this.micProducerId != micProducer.id)
+			if (micProducer && this.micProducerId !== micProducer.id)
 			{
 
 				// delete/dc previous one 
@@ -563,7 +567,7 @@ export default class BrowserRecorder
 
 			for (const [ consumerId, aCStreamSource ] in this.audioConsumersMap.entries())
 			{
-				if (!audioConsumers.find((c) => consumerId == c.id))
+				if (!audioConsumers.find((c) => consumerId === c.id))
 				{
 					aCStreamSource.disconnect(this.dest);
 					this.audioConsumersMap.delete(consumerId);
