@@ -1,12 +1,11 @@
 import Logger from './Logger';
-import streamSaver from 'streamsaver';
-import { WritableStream } from 'web-streams-polyfill/ponyfill';
+import { WritableStream, TransformStream } from 'web-streams-polyfill/ponyfill';
+import * as streamsaver from 'streamsaver';
 import { openDB, deleteDB } from 'idb';
 import * as meActions from './actions/meActions';
 import { store } from './store';
 import * as requestActions from './actions/requestActions';
 import { RECORDING_PAUSE, RECORDING_RESUME, RECORDING_STOP, RECORDING_START } from './actions/recorderActions';
-
 export default class BrowserRecorder
 {
 	constructor()
@@ -87,9 +86,8 @@ export default class BrowserRecorder
 		this.roomClient = roomClient;
 		this.recordingMimeType = recordingMimeType;
 		const dt = new Date();
-		const rdt = `${dt.getFullYear() }-${ (`0${ dt.getMonth()+1}`).slice(-2) }-${ (`0${ dt.getDate()}`).slice(-2) }_${dt.getHours() }:${(`0${ dt.getMinutes()}`).slice(-2) }:${dt.getSeconds()}`;
+		const rdt = `${dt.getFullYear() }-${ (`0${ dt.getMonth()+1}`).slice(-2) }-${ (`0${ dt.getDate()}`).slice(-2) }_${dt.getHours() }_${(`0${ dt.getMinutes()}`).slice(-2) }_${dt.getSeconds()}`;
 
-		this.fileName = `${roomname}-recording-${rdt}.webm`;
 		this.logger.debug('startLocalRecording()');
 
 		this.ctx = new AudioContext();
@@ -139,14 +137,50 @@ export default class BrowserRecorder
 				this.recorderStream = this.mixer(null, this.gdmStream);
 			}
 
+			// eslint-disable-next-line no-console
+			console.log(streamsaver);
+
+			const useStreamSaver = true;
+			const streamSaver = streamsaver;
+
+			let writer;
+
 			this.recorder = new MediaRecorder(
 				this.recorderStream, { mimeType: this.recordingMimeType }
 			);
+
+			const ext = this.recorder.mimeType.split(';')[0].split('/')[1];
+
+			this.fileName = `${roomname}-recording-${rdt}.${ext}`;
 
 			if (typeof indexedDB === 'undefined' || typeof indexedDB.open === 'undefined')
 			{
 				this.logger.warn('IndexedDB API is not available in this browser. Fallback to ');
 				this.logToIDB = false;
+			}
+			else if (useStreamSaver)
+			{
+				// streamsaver
+				if (!window.WritableStream)
+				{
+					streamSaver.WritableStream = WritableStream;
+				}
+				if (!window.TransformStream)
+				{
+					streamSaver.TransformStream = TransformStream;
+				}
+
+				const { readable, writable } = new TransformStream({
+					transform : (chunk, ctrl) => chunk.arrayBuffer().then(
+						(b) => ctrl.enqueue(new Uint8Array(b))
+					)
+				});
+
+				writer = writable.getWriter();
+				// this.fileName = `media.${ext}`;
+
+				readable.pipeTo(streamSaver.createWriteStream(this.fileName));
+
 			}
 			else
 			{
@@ -173,29 +207,44 @@ export default class BrowserRecorder
 
 			if (this.recorder)
 			{
-				this.recorder.ondataavailable = (e) =>
+				if (useStreamSaver)
 				{
-					if (e.data && e.data.size > 0)
+					this.recorder.ondataavailable = (e) =>
 					{
-						chunkCounter++;
-						this.logger.debug(`put chunk: ${chunkCounter}`);
-						if (this.logToIDB)
+
+						if (e.data && e.data.size > 0)
 						{
-							try
+							writer.write(e.data);
+						}
+					};
+				}
+				else
+				{
+					this.recorder.ondataavailable = (e) =>
+					{
+
+						if (e.data && e.data.size > 0)
+						{
+							chunkCounter++;
+							this.logger.debug(`put chunk: ${chunkCounter}`);
+							if (this.logToIDB)
 							{
-								saveToDB(e.data);
+								try
+								{
+									saveToDB(e.data);
+								}
+								catch (error)
+								{
+									this.logger.error('Error during saving data chunk to IndexedDB! error:%O', error);
+								}
 							}
-							catch (error)
+							else
 							{
-								this.logger.error('Error during saving data chunk to IndexedDB! error:%O', error);
+								this.recordingData.push(e.data);
 							}
 						}
-						else
-						{
-							this.recordingData.push(e.data);
-						}
-					}
-				};
+					};
+				}
 
 				this.recorder.onerror = (error) =>
 				{
@@ -219,60 +268,62 @@ export default class BrowserRecorder
 
 				};
 
-				this.recorder.onstop = (e) =>
+				if (useStreamSaver)
 				{
-					this.logger.debug(`Logger stopped event: ${e}`);
-
-					if (this.logToIDB)
+					this.recorder.onstop = (e) =>
 					{
-						try
+						this.logger.debug(`Logger stopped event: ${e}`);
+						setTimeout(() =>
 						{
-							const useFallback = false;
+							writer.close();
+						}, 1000);
+					};
+				}
+				else
+				{
 
-							if (useFallback)
+					this.recorder.onstop = (e) =>
+					{
+						this.logger.debug(`Logger stopped event: ${e}`);
+
+						if (this.logToIDB)
+						{
+							try
 							{
-								this.idbDB.getAll(this.idbStoreName).then((blobs) =>
-								{
+								const useFallback = false;
 
-									this.saveRecordingAndCleanup(blobs, this.idbDB, this.idbName);
-
-								});
-							}
-							else
-							{
-								// stream saver
-								// On firefox WritableStream isn't implemented yet web-streams-polyfill/ponyfill will fix it
-								if (!window.WritableStream)
+								if (useFallback)
 								{
-									streamSaver.WritableStream = WritableStream;
+									this.idbDB.getAll(this.idbStoreName).then((blobs) =>
+									{
+
+										this.saveRecordingAndCleanup(blobs, this.idbDB, this.idbName);
+
+									});
 								}
-								const fileStream = streamSaver.createWriteStream(`${this.idbName}.webm`, {
-									// size : blob.size // Makes the procentage visiable in the download
-								});
-
-								const writer = fileStream.getWriter();
-
-								this.idbDB.getAllKeys(this.idbStoreName).then((keys) =>
+								else
 								{
-									// recursive function to save the data from the indexed db
-									this.saveRecordingWithStreamSaver(
-										keys, writer, true, this.idbDB, this.idbName
-									);
-								});
+									this.idbDB.getAllKeys(this.idbStoreName).then((keys) =>
+									{
+										// recursive function to save the data from the indexed db
+										this.saveRecordingWithStreamSaver(
+											writer, true, this.idbDB, this.idbName
+										);
+									});
+								}
 							}
+							catch (error)
+							{
+								this.logger.error('Error during getting all data chunks from IndexedDB! error: %O', error);
+							}
+
 						}
-						catch (error)
+						else
 						{
-							this.logger.error('Error during getting all data chunks from IndexedDB! error: %O', error);
+							this.saveRecordingAndCleanup(this.recordingData, this.idbDB, this.idbName);
 						}
-
-					}
-					else
-					{
-						this.saveRecordingAndCleanup(this.recordingData, this.idbDB, this.idbName);
-					}
-
-				};
+					};
+				}
 
 				this.recorder.start(this.RECORDING_SLICE_SIZE);
 				meActions.setLocalRecordingState(RECORDING_START);
