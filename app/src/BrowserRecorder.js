@@ -137,9 +137,6 @@ export default class BrowserRecorder
 				this.recorderStream = this.mixer(null, this.gdmStream);
 			}
 
-			// eslint-disable-next-line no-console
-			console.log(streamsaver);
-
 			const useStreamSaver = true;
 			const streamSaver = streamsaver;
 
