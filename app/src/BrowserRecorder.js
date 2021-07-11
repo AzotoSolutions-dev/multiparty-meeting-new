@@ -10,7 +10,7 @@ export default class BrowserRecorder
 {
 	constructor()
 	{
-		// react
+		// react intl
 		this.intl = null;
 
 		// MediaRecorder
@@ -23,13 +23,19 @@ export default class BrowserRecorder
 		this.fileName = 'apple.webm';
 		this.logger = new Logger('Recorder');
 
+		// streamSaver 
+		this.writer = null;
+
+		// fallback option
+		this.useStreamSaverPump = false;
+
 		// IndexedDB
 		this.idbDB = null;
 		this.logToIDB = null;
 		this.idbName = 'default';
 		this.idbStoreName = 'chunks';
 
-		// MIXER
+		// Audio MIXER
 		this.ctx = null;
 		this.dest = null;
 		this.gainNode = null;
@@ -85,11 +91,14 @@ export default class BrowserRecorder
 	{
 		this.roomClient = roomClient;
 		this.recordingMimeType = recordingMimeType;
+
+		// get date for filename 
 		const dt = new Date();
 		const rdt = `${dt.getFullYear() }-${ (`0${ dt.getMonth()+1}`).slice(-2) }-${ (`0${ dt.getDate()}`).slice(-2) }_${dt.getHours() }_${(`0${ dt.getMinutes()}`).slice(-2) }_${dt.getSeconds()}`;
 
 		this.logger.debug('startLocalRecording()');
 
+		// audio mixer init
 		this.ctx = new AudioContext();
 		this.dest = this.ctx.createMediaStreamDestination();
 		this.gainNode = this.ctx.createGain();
@@ -108,7 +117,7 @@ export default class BrowserRecorder
 
 		try
 		{
-			// Screensharing
+			// Screensharing video ( and audio on Chrome )
 			this.gdmStream = await navigator.mediaDevices.getDisplayMedia(
 				this.RECORDING_CONSTRAINTS
 			);
@@ -140,8 +149,6 @@ export default class BrowserRecorder
 			const useStreamSaver = true;
 			const streamSaver = streamsaver;
 
-			let writer;
-
 			this.recorder = new MediaRecorder(
 				this.recorderStream, { mimeType: this.recordingMimeType }
 			);
@@ -157,7 +164,9 @@ export default class BrowserRecorder
 			}
 			else if (useStreamSaver)
 			{
-				// streamsaver
+				// using streamSaver wont write to IndexedDB
+				this.logToIDB = false;
+
 				if (!window.WritableStream)
 				{
 					streamSaver.WritableStream = WritableStream;
@@ -173,11 +182,24 @@ export default class BrowserRecorder
 					)
 				});
 
-				writer = writable.getWriter();
-				// this.fileName = `media.${ext}`;
+				const fileStream = streamSaver.createWriteStream(this.fileName);
 
-				readable.pipeTo(streamSaver.createWriteStream(this.fileName));
+				try
+				{
+					if (streamSaver.WritableStream && readable.pipeTo)
+					{
+						this.writer = writable.getWriter();
+						await readable.pipeTo(fileStream);
+						// .then(() => console.log('done writing'));
+					}
+				}
+				catch (error)
+				{
+					this.logger.debug(`Fallback to Pump : ${error}`);
+					this.writer = fileStream.getWriter();
+					this.useStreamSaverPump = true;
 
+				}
 			}
 			else
 			{
@@ -206,14 +228,28 @@ export default class BrowserRecorder
 			{
 				if (useStreamSaver)
 				{
-					this.recorder.ondataavailable = (e) =>
+					if (!this.useStreamSaverPump)
 					{
-
-						if (e.data && e.data.size > 0)
+						this.recorder.ondataavailable = (e) =>
 						{
-							writer.write(e.data);
-						}
-					};
+
+							if (e.data && e.data.size > 0)
+							{
+								this.writer.write(e.data);
+							}
+						};
+					}
+					else
+					{
+						this.recorder.ondataavailable = (e) =>
+						{
+
+							if (e.data && e.data.size > 0)
+							{
+								this.pumpStreamSaverData(e.data);
+							}
+						};
+					}
 				}
 				else
 				{
@@ -272,7 +308,7 @@ export default class BrowserRecorder
 						this.logger.debug(`Logger stopped event: ${e}`);
 						setTimeout(() =>
 						{
-							writer.close();
+							this.writer.close();
 						}, 1000);
 					};
 				}
@@ -304,7 +340,7 @@ export default class BrowserRecorder
 									{
 										// recursive function to save the data from the indexed db
 										this.saveRecordingWithStreamSaver(
-											writer, true, this.idbDB, this.idbName
+											this.writer, true, this.idbDB, this.idbName
 										);
 									});
 								}
@@ -472,6 +508,26 @@ export default class BrowserRecorder
 
 		// destroy
 		this.saveRecordingCleanup(db, dbName);
+	}
+
+	pumpStreamSaverData(data)
+	{
+		// push data to download stream
+		let readableStream = null;
+
+		let reader = null;
+
+		let pump = null;
+
+		readableStream = data.stream();
+
+		reader = readableStream.getReader();
+		pump = () => reader.read()
+			.then((res) => (res.done
+				? void(0)
+				: this.writer.write(res.value).then(pump)
+			));
+		pump();
 	}
 
 	// save recording with Stream saver and destroy
