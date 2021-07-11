@@ -22,6 +22,12 @@ convict.addFormat({
  * public/config/config.example.js files.
  */
 const configSchema = convict({
+	useStreamSaver :
+	{
+		doc     : 'Use only StreamSaver for LocalRecording.',
+		format  : 'Boolean',
+		default : false
+	},
 	loginEnabled :
 	{
 		doc     : 'If the login is enabled.',

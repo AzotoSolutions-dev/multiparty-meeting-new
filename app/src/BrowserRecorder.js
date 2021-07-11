@@ -8,7 +8,7 @@ import * as requestActions from './actions/requestActions';
 import { RECORDING_PAUSE, RECORDING_RESUME, RECORDING_STOP, RECORDING_START } from './actions/recorderActions';
 export default class BrowserRecorder
 {
-	constructor()
+	constructor(useStreamSaver = false)
 	{
 		// react intl
 		this.intl = null;
@@ -24,6 +24,7 @@ export default class BrowserRecorder
 		this.logger = new Logger('Recorder');
 
 		// streamSaver
+		this.useStreamSaver = useStreamSaver;
 		this.streamSaver = null;
 		this.writer = null;
 
@@ -172,7 +173,7 @@ export default class BrowserRecorder
 			if (this.streamSaver.WritableStream && readable.pipeTo)
 			{
 				this.writer = writable.getWriter();
-				readable.pipeTo(fileStream);
+				await readable.pipeTo(fileStream);
 				// .then(() => console.log('done writing'));
 			}
 		}
@@ -422,8 +423,6 @@ export default class BrowserRecorder
 		{
 			await this.getUserMedia(additionalAudioTracks);
 
-			const useStreamSaver = false;
-
 			this.streamSaver = streamsaver;
 
 			this.recorder = new MediaRecorder(
@@ -436,7 +435,7 @@ export default class BrowserRecorder
 
 			if (this.recorder)
 			{
-				if (useStreamSaver)
+				if (this.useStreamSaver)
 				{
 					// StreamSaver without IDB
 					this.streamSaverStart();
