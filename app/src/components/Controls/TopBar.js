@@ -74,16 +74,7 @@ const styles = (theme) =>
 		{
 			margin  : 0,
 			padding : 0
-		},
-		logo :
-		{
-			display                      : 'none',
-			marginLeft                   : 20,
-			[theme.breakpoints.up('sm')] :
-			{
-				display : 'block'
-			}
-		},
+		},		
 		divider :
 		{
 			marginLeft : theme.spacing(3)
