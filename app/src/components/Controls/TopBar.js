@@ -75,6 +75,15 @@ const styles = (theme) =>
 			margin  : 0,
 			padding : 0
 		},		
+		logo :
+		{
+			display                      : 'none',
+			marginLeft                   : 20,
+			[theme.breakpoints.up('sm')] :
+			{
+				display : 'block'
+			}
+		},
 		divider :
 		{
 			marginLeft : theme.spacing(3)
@@ -515,8 +524,7 @@ const TopBar = (props) =>
 						onClick={(event) => handleMenuOpen(event, 'localeMenu')}
 					>
 						{locale.split(/[-_]/)[0]}
-					</Button>
-					
+					</Button>					
 				</Toolbar>
 			</AppBar>
 			<Popover
