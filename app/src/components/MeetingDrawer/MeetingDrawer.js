@@ -83,17 +83,7 @@ const MeetingDrawer = (props) =>
 								})}
 							</Badge>
 						}
-					/>
-					<Tab
-						label={
-							<Badge color='secondary' badgeContent={unreadFiles}>
-								{intl.formatMessage({
-									id             : 'label.filesharing',
-									defaultMessage : 'File sharing'
-								})}
-							</Badge>
-						}
-					/>
+					/>					
 					<Tab
 						label={
 							<Badge color='secondary' badgeContent={raisedHands}>
