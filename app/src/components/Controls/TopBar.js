@@ -526,21 +526,7 @@ const TopBar = (props) =>
 						{locale.split(/[-_]/)[0]}
 					</Button>
 
-					<Button
-						aria-label={intl.formatMessage({
-							id             : 'label.leave',
-							defaultMessage : 'Leave'
-						})}
-						className={classes.actionButton}
-						variant='contained'
-						color='secondary'
-						onClick={() => roomClient.close()}
-					>
-						<FormattedMessage
-							id='label.leave'
-							defaultMessage='Leave'
-						/>
-					</Button>
+					
 				</Toolbar>
 			</AppBar>
 			<Popover
@@ -840,85 +826,7 @@ const TopBar = (props) =>
 							defaultMessage='Add video'
 						/>
 					</p>
-				</MenuItem>
-				<MenuItem
-					onClick={() =>
-					{
-						handleMenuClose();
-						setHideSelfView(!room.hideSelfView);
-					}}
-				>
-					{ room.hideSelfView ?
-						<SelfViewOnIcon
-							aria-label={intl.formatMessage({
-								id             : 'room.showSelfView',
-								defaultMessage : 'Show self view video'
-							})}
-						/>
-						:
-						<SelfViewOffIcon
-							aria-label={intl.formatMessage({
-								id             : 'room.hideSelfView',
-								defaultMessage : 'Hide self view video'
-							})}
-						/>
-					}
-					{ room.hideSelfView ?
-						<p className={classes.moreAction}>
-							<FormattedMessage
-								id='room.showSelfView'
-								defaultMessage='Show self view video'
-							/>
-						</p>
-						:
-						<p className={classes.moreAction}>
-							<FormattedMessage
-								id='room.hideSelfView'
-								defaultMessage='Hide self view video'
-							/>
-						</p>
-					}
-				</MenuItem>
-				<MenuItem
-					onClick={() =>
-					{
-						handleMenuClose();
-						setHelpOpen(!room.helpOpen);
-					}}
-				>
-					<HelpIcon
-						aria-label={intl.formatMessage({
-							id             : 'room.help',
-							defaultMessage : 'Help'
-						})}
-					/>
-					<p className={classes.moreAction}>
-						<FormattedMessage
-							id='room.help'
-							defaultMessage='Help'
-						/>
-					</p>
-				</MenuItem>
-				<MenuItem
-					onClick={() =>
-					{
-						handleMenuClose();
-						setAboutOpen(!room.aboutOpen);
-					}}
-				>
-					<InfoIcon
-						aria-label={intl.formatMessage({
-							id             : 'room.about',
-							defaultMessage : 'About'
-						})}
-					/>
-					<p className={classes.moreAction}>
-						<FormattedMessage
-							id='room.about'
-							defaultMessage='About'
-						/>
-					</p>
-				</MenuItem>
+				</MenuItem>				
 			</Menu>
 		</React.Fragment>
 	);
