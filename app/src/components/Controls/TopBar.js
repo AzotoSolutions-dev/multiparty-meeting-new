@@ -74,7 +74,7 @@ const styles = (theme) =>
 		{
 			margin  : 0,
 			padding : 0
-		},		
+		},
 		logo :
 		{
 			display                      : 'none',
@@ -524,7 +524,23 @@ const TopBar = (props) =>
 						onClick={(event) => handleMenuOpen(event, 'localeMenu')}
 					>
 						{locale.split(/[-_]/)[0]}
-					</Button>					
+					</Button>
+
+					<Button
+						aria-label={intl.formatMessage({
+							id             : 'label.leave',
+							defaultMessage : 'Leave'
+						})}
+						className={classes.actionButton}
+						variant='contained'
+						color='secondary'
+						onClick={() => roomClient.close()}
+					>
+						<FormattedMessage
+							id='label.leave'
+							defaultMessage='Leave'
+						/>
+					</Button>
 				</Toolbar>
 			</AppBar>
 			<Popover
